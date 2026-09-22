@@ -616,7 +616,7 @@ function drawEnemies(){for(const e of enemies){if(e.gone||(!e.active&&!e.flip))c
     /* ذيل */const tw=Math.sin(a*3)*5;ctx.fillStyle=bc;ctx.beginPath();ctx.moveTo(-26,4);ctx.quadraticCurveTo(-38,8+tw,-34,18+tw);ctx.lineTo(-28,16);ctx.closePath();ctx.fill();ctx.fillStyle=angry?'#FF4040':'#4A4A58';ctx.beginPath();ctx.moveTo(-34,14+tw);ctx.lineTo(-40,10+tw);ctx.lineTo(-36,20+tw);ctx.closePath();ctx.fill();ctx.fillStyle='#C82020';ctx.beginPath();ctx.moveTo(-38,16+tw);ctx.lineTo(-44,12+tw);ctx.lineTo(-40,22+tw);ctx.closePath();ctx.fill()}
   ctx.restore()}}
 
-function drawFlag(){const sx=Math.round(flagPole.x-G.cam.x);if(sx<-120||sx>VIEW_W+120)return;const top=flagPole.top,base=flagPole.base;
+function drawFlag(){if(curSpec.flag<0)return;const sx=Math.round(flagPole.x-G.cam.x);if(sx<-120||sx>VIEW_W+120)return;const top=flagPole.top,base=flagPole.base;
   ctx.fillStyle='#2E7D2E';ctx.fillRect(sx-20,base-8,46,8);ctx.fillStyle='#9AA0A8';ctx.fillRect(sx-3,top,6,base-top);ctx.fillStyle='#C6CCD4';ctx.fillRect(sx-3,top,2,base-top);
   ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(sx,top-4,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#B8860B';ctx.beginPath();ctx.arc(sx,top-4,8,Math.PI*0.25,Math.PI*1.25);ctx.fill();
   const fy=flagPole.flagY===undefined?top+8:flagPole.flagY;const wave=Math.sin(G.frame*0.08)*6;
@@ -624,7 +624,7 @@ function drawFlag(){const sx=Math.round(flagPole.x-G.cam.x);if(sx<-120||sx>VIEW_
   ctx.fillStyle='#007A00';ctx.beginPath();ctx.moveTo(sx+3,fy+22);ctx.lineTo(sx+30+wave*0.6,fy+22);ctx.lineTo(sx+3,fy+32);ctx.closePath();ctx.fill();
   ctx.fillStyle='#FFD700';ctx.font='bold 15px Cairo,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('★',sx+16,fy+16)}
 
-function drawCastle(){const sx=Math.round(castleX-G.cam.x),base=groundTop*TILE;if(sx>VIEW_W+200||sx<-260)return;const w=5*TILE,h=5*TILE,y=base-h;
+function drawCastle(){if(curSpec.castle<0)return;const sx=Math.round(castleX-G.cam.x),base=groundTop*TILE;if(sx>VIEW_W+200||sx<-260)return;const w=5*TILE,h=5*TILE,y=base-h;
   ctx.fillStyle='#9A6A5A';ctx.fillRect(sx,y,w,h);ctx.strokeStyle='#5E3A2E';ctx.lineWidth=2;
   for(let by=y;by<base;by+=12){ctx.beginPath();ctx.moveTo(sx,by);ctx.lineTo(sx+w,by);ctx.stroke();for(let bx=sx+((by/12)%2?10:0);bx<sx+w;bx+=20){ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx,by+12);ctx.stroke()}}
   ctx.fillStyle='#7A4A3A';for(let i=0;i<5;i++)ctx.fillRect(sx+i*32,y-12,20,14);
@@ -665,7 +665,7 @@ function drawHUD(){ctx.save();ctx.textBaseline='middle';const g=ctx.createLinear
   ctx.font='bold 12px Cairo,Arial';ctx.fillStyle='#DDD';ctx.fillText('الأرواح',400,13);drawMiniMario(400,22);ctx.font='bold 17px Cairo,Arial';ctx.fillStyle='#FFF';ctx.fillText('× '+G.lives,420,31);
   ctx.textAlign='right';ctx.font='bold 13px Cairo,Arial';ctx.fillStyle='#FFD700';ctx.fillText(powerLabel(),VIEW_W-14,14);
   if(mario.star>0){ctx.fillStyle='#FFF';ctx.font='bold 12px Cairo,Arial';ctx.fillText('⭐ '+Math.ceil(mario.star/60)+' ثانية',VIEW_W-14,31)}else if(G.best>0){ctx.fillStyle='#9AA';ctx.font='bold 12px Cairo,Arial';ctx.fillText('🏆 '+pad(G.best,6),VIEW_W-14,31)}
-  const prog=Math.max(0,Math.min(1,mario.x/Math.max(1,flagPole.x)));ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(VIEW_W/2-90,40,180,5);ctx.fillStyle='#FFD700';ctx.fillRect(VIEW_W/2-90,40,180*prog,5);ctx.fillStyle='#FFF';ctx.fillRect(VIEW_W/2-90+180*prog-2,38,4,9);
+  const progTarget=curSpec.flag>=0?flagPole.x:enemies.find(e=>e.boss)?enemies.find(e=>e.boss).ox:flagPole.x;const prog=Math.max(0,Math.min(1,mario.x/Math.max(1,progTarget)));ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(VIEW_W/2-90,40,180,5);ctx.fillStyle='#FFD700';ctx.fillRect(VIEW_W/2-90,40,180*prog,5);ctx.fillStyle='#FFF';ctx.fillRect(VIEW_W/2-90+180*prog-2,38,4,9);
   /* شريط صحة باوزر */const boss=enemies.find(e=>e.boss&&!e.gone&&!e.flip);if(boss&&boss.active){const bw=220,bh=14,bx=VIEW_W/2-bw/2,by=VIEW_H-bh-14;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(bx-2,by-2,bw+4,bh+4);ctx.strokeStyle='#FF4040';ctx.lineWidth=2;ctx.strokeRect(bx-2,by-2,bw+4,bh+4);const hp=Math.max(0,boss.hp)/boss.maxHp;ctx.fillStyle=hp>0.5?'#FF3030':(hp>0.25?'#FF8000':'#FF0000');ctx.fillRect(bx,by,bw*hp,bh);ctx.fillStyle='#FFF';ctx.font='bold 11px Cairo,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔥 باوزر '+boss.hp+'/'+boss.maxHp+' ❤️',VIEW_W/2,by+bh/2)}
   ctx.restore()}
 
